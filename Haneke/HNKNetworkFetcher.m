@@ -19,11 +19,11 @@
 //
 
 #import "HNKNetworkFetcher.h"
-
+#import <SDWebImage/SDWebImageManager.h>
 @implementation HNKNetworkFetcher {
     NSURL *_URL;
     BOOL _cancelled;
-    NSURLSessionDataTask *_dataTask;
+    id<SDWebImageOperation> _downloadOperation;
 }
 
 - (instancetype)initWithURL:(NSURL*)URL
@@ -42,76 +42,33 @@
 
 - (void)fetchImageWithSuccess:(void (^)(UIImage *image))successBlock failure:(void (^)(NSError *error))failureBlock;
 {
+    
     _cancelled = NO;
     __weak __typeof__(self) weakSelf = self;
-    _dataTask = [self.URLSession dataTaskWithURL:_URL completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+    
+   _downloadOperation = [[SDWebImageManager sharedManager] downloadImageWithURL:_URL options:0 progress:^(NSInteger receivedSize, NSInteger expectedSize) {
+        
+    } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
         __strong __typeof__(weakSelf) strongSelf = weakSelf;
-
         if (!strongSelf) return;
-
         if (strongSelf->_cancelled) return;
-        
-        NSURL *URL = strongSelf->_URL;
-        
-        if (error)
-        {
-            if ([error.domain isEqualToString:NSURLErrorDomain] && error.code == NSURLErrorCancelled) return;
-            
-            HanekeLog(@"Request %@ failed with error %@", URL.absoluteString, error);
-            if (!failureBlock) return;
-            
-            dispatch_async(dispatch_get_main_queue(), ^{
-                failureBlock(error);
-            });
-            return;
-        }
-        
-        if (![response isKindOfClass:NSHTTPURLResponse.class])
-        {
-            HanekeLog(@"Request %@ received unknown response %@", URL.absoluteString, response);
-            return;
-        }
-        
-        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
-        if (httpResponse.statusCode != 200 && httpResponse.statusCode != 201)
-        {
-            NSString *errorDescription = [NSHTTPURLResponse localizedStringForStatusCode:httpResponse.statusCode];
-            [strongSelf failWithLocalizedDescription:errorDescription code:HNKErrorNetworkFetcherInvalidStatusCode block:failureBlock];
-            return;
-        }
-        
-        const long long expectedContentLength = response.expectedContentLength;
-        if (expectedContentLength > -1)
-        {
-            const NSUInteger dataLength = data.length;
-            if (dataLength < expectedContentLength)
-            {
-                NSString *errorDescription = [NSString stringWithFormat:NSLocalizedString(@"Request %@ received %ld out of %ld bytes", @""), URL.absoluteString, (long)dataLength, (long)expectedContentLength];
-                [strongSelf failWithLocalizedDescription:errorDescription code:HNKErrorNetworkFetcherMissingData block:failureBlock];
-                return;
-            }
-        }
-        
-        UIImage *image = [UIImage imageWithData:data];
         
         if (!image)
         {
-            NSString *errorDescription = [NSString stringWithFormat:NSLocalizedString(@"Failed to load image from data at URL %@", @""), URL];
+            NSString *errorDescription = [NSString stringWithFormat:NSLocalizedString(@"Failed to load image from data at URL %@", @""), imageURL];
             [strongSelf failWithLocalizedDescription:errorDescription code:HNKErrorNetworkFetcherInvalidData block:failureBlock];
             return;
         }
-        
         dispatch_async(dispatch_get_main_queue(), ^{
             successBlock(image);
         });
-        
+ 
     }];
-    [_dataTask resume];
 }
 
 - (void)cancelFetch
 {
-    [_dataTask cancel];
+    [_downloadOperation cancel];
     _cancelled = YES;
 }
 
@@ -127,7 +84,7 @@
     HanekeLog(@"%@", localizedDescription);
     if (!failureBlock) return;
 
-    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : localizedDescription , NSURLErrorKey : _URL};
+    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : localizedDescription , NSURLErrorKey : _URL?_URL:@""};
     NSError *error = [NSError errorWithDomain:HNKErrorDomain code:code userInfo:userInfo];
     dispatch_async(dispatch_get_main_queue(), ^{
         failureBlock(error);

@@ -29,4 +29,5 @@ Haneke resizes images and caches the result on memory and disk. Everything is do
   s.requires_arc = true
   s.source_files = 'Haneke/*.{h,m}'
   s.framework = 'ImageIO'
+  s.dependency 'SDWebImage'
 end
