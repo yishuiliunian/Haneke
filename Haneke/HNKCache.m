@@ -107,7 +107,9 @@ NSString *const HNKErrorDomain = @"com.hpique.haneke";
     {
         [self removeImagesOfFormatNamed:formatName];
     }
-    _formats[formatName] = format;
+    if (formatName != nil) {
+      _formats[formatName] = format;
+    }
     format.cache = self;
     format.diskCache = [[HNKDiskCache alloc] initWithDirectory:format.directory capacity:format.diskCapacity];
     [self enumeratePreloadImagesOfFormat:format usingBlock:^(NSString *key, UIImage *image) {

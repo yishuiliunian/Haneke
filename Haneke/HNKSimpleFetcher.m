@@ -42,7 +42,9 @@
 
 - (void)fetchImageWithSuccess:(void (^)(UIImage *image))successBlock failure:(void (^)(NSError *error))failureBlock;
 {
-    successBlock(_image);
+    if (successBlock != NULL) {
+        successBlock(_image);
+    }
 }
 
 @end
