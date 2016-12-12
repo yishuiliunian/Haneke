@@ -45,14 +45,14 @@
     
     _cancelled = NO;
     __weak __typeof__(self) weakSelf = self;
-    
-   _downloadOperation = [[SDWebImageManager sharedManager] downloadImageWithURL:_URL options:0 progress:^(NSInteger receivedSize, NSInteger expectedSize) {
-        
-    } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
+
+    _downloadOperation = [[SDWebImageManager sharedManager] loadImageWithURL:_URL options:0 progress:^(NSInteger receivedSize, NSInteger expectedSize, NSURL *targetURL) {
+
+    } completed:^(UIImage *image, NSData *data, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
         __strong __typeof__(weakSelf) strongSelf = weakSelf;
         if (!strongSelf) return;
         if (strongSelf->_cancelled) return;
-        
+
         if (!image)
         {
             NSString *errorDescription = [NSString stringWithFormat:NSLocalizedString(@"Failed to load image from data at URL %@", @""), imageURL];
@@ -62,7 +62,6 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             successBlock(image);
         });
- 
     }];
 }
 
