@@ -529,7 +529,10 @@ NSString *const HNKErrorDomain = @"com.hpique.haneke";
     }
     
     const CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    const CGSize pixelSize = CGSizeMake(self.size.width * self.scale, self.size.height * self.scale);
+
+
+
+    const CGSize pixelSize = CGSizeMake(self.size.width *  self.scale, self.size.height * self.scale);
     const CGContextRef context = CGBitmapContextCreate(NULL,
                                                        pixelSize.width,
                                                        pixelSize.height,
@@ -554,7 +557,7 @@ NSString *const HNKErrorDomain = @"com.hpique.haneke";
     UIGraphicsPopContext();
     const CGImageRef decompressedImageRef = CGBitmapContextCreateImage(context);
     CGContextRelease(context);
-    
+
     const CGFloat scale = [UIScreen mainScreen].scale;
     image = [UIImage imageWithCGImage:decompressedImageRef scale:scale orientation:UIImageOrientationUp];
     CGImageRelease(decompressedImageRef);
