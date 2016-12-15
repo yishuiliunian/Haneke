@@ -93,6 +93,7 @@
  */
 - (void)removeAllData;
 
+- (void) removeAllDataSync;
 #pragma mark Managing data by access date
 ///---------------------------------------------
 /// @name Managing data by access date

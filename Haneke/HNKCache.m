@@ -242,7 +242,7 @@ NSString *const HNKErrorDomain = @"com.hpique.haneke";
 {
     HNKCacheFormat *format = _formats[formatName];
     if (!format) return;
-    [format.diskCache removeAllData];
+    [format.diskCache removeAllDataSync];
 }
 
 - (void) removeAllDiskImages

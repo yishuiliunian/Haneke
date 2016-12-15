@@ -119,25 +119,29 @@ NSString *const HNKExtendedFileAttributeKey = @"io.haneke.key";
 - (void)removeAllData
 {
     dispatch_async(_queue, ^{
-        NSFileManager *fileManager = [NSFileManager defaultManager];
-        NSError *error;
-        NSArray *contents = [fileManager contentsOfDirectoryAtPath:_directory error:&error];
-        if (!contents) {
-            NSLog(@"Failed to list directory with error %@", error);
-            return;
-        }
-        for (NSString *pathComponent in contents)
-        {
-            NSString *path = [_directory stringByAppendingPathComponent:pathComponent];
-            if (![fileManager removeItemAtPath:path error:&error])
-            {
-                NSLog(@"Failed to remove file with error %@", error);
-            }
-        }
-        [self calculateSize];
+        [self removeAllDataSync];
     });
 }
 
+- (void) removeAllDataSync
+{
+    NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSError *error;
+    NSArray *contents = [fileManager contentsOfDirectoryAtPath:_directory error:&error];
+    if (!contents) {
+        NSLog(@"Failed to list directory with error %@", error);
+        return;
+    }
+    for (NSString *pathComponent in contents)
+    {
+        NSString *path = [_directory stringByAppendingPathComponent:pathComponent];
+        if (![fileManager removeItemAtPath:path error:&error])
+        {
+            NSLog(@"Failed to remove file with error %@", error);
+        }
+    }
+    [self calculateSize];
+}
 #pragma mark Managing data by access date
 
 - (void)enumerateDataByAccessDateUsingBlock:(void(^)(NSString *key, NSData *data, NSDate *accessDate, BOOL *stop))block
