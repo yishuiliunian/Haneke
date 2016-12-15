@@ -238,6 +238,19 @@ NSString *const HNKErrorDomain = @"com.hpique.haneke";
      }];
 }
 
+- (void) removeDiskImagesOfFormatNamed:(NSString *)formatName
+{
+    HNKCacheFormat *format = _formats[formatName];
+    if (!format) return;
+    [format.diskCache removeAllData];
+}
+
+- (void) removeAllDiskImages
+{
+    [self.formats enumerateKeysAndObjectsUsingBlock:^(NSString * key, id obj, BOOL *stop) {
+        [self removeDiskImagesOfFormatNamed:key];
+    }];
+}
 - (void)removeImagesForKey:(NSString *)key
 {
     [_memoryCaches enumerateKeysAndObjectsUsingBlock:^(id _, NSCache *cache, BOOL *stop) {

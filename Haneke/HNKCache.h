@@ -126,6 +126,10 @@
  */
 - (void)removeImagesForKey:(NSString*)key;
 
+/*
+ * remove all disk images
+ * */
+- (void) removeAllDiskImages;
 @end
 
 /** Fetches an image asynchronously. Used by the cache to fetch the original image from which resized images will be created.
