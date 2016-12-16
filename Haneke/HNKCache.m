@@ -214,9 +214,9 @@ NSString *const HNKErrorDomain = @"com.hpique.haneke";
 {
     HNKCacheFormat *format = _formats[formatName];
     NSAssert(format, @"Unknown format %@", formatName);
-    
-    [self setMemoryImage:image forKey:key format:format];
-    [self setDiskImage:image forKey:key format:format];
+    UIImage *redirectImage = [self imageFromOriginal:image key:key format:format];
+    [self setMemoryImage:redirectImage forKey:key format:format];
+    [self setDiskImage:redirectImage forKey:key format:format];
 }
 
 #pragma mark Removing images
